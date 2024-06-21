@@ -10,6 +10,7 @@ build = "build.rs"
 [dependencies]
 slint = "1.6"
 libgraphicimage-slint = { path = "../libgraphicimage-slint" }
+libnmea0183 = { path = "../libnmea0183" }
 clap = { version = "4.5.7", features = ["derive"] }
 chrono = "0.4.38"
 

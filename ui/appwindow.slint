@@ -1,4 +1,21 @@
-import { Button, VerticalBox } from "std-widgets.slint";
+import { VerticalBox, HorizontalBox, LineEdit } from "std-widgets.slint";
 
 export component AppWindow inherits Window {
+    in property<image> graph-image;
+    in property<length> graph-image-width : 640px;
+    in property<length> graph-image-height : 480px;
+
+    VerticalBox {
+        Image {
+            width: graph-image-width;
+            height: graph-image-height;
+            source: graph-image;
+        }
+        HorizontalBox {
+            Text { text: "Start timestamp: "; horizontal-stretch: 0;}
+            start-time-text := LineEdit {}
+            Text { text: "End timestamp: "; horizontal-stretch: 0; }
+            end-time-text := LineEdit {}
+        }
+    }
 }
