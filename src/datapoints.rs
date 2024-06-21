@@ -28,10 +28,10 @@ const WIND_DIRECTION_COLOUR: Rgb8Pixel = Rgb8Pixel {
 
 #[derive(Debug, Clone)]
 pub struct DataPoint {
-    timestamp: DateTime<Utc>,
-    boatspeed: f32,
-    windspeed: f32,
-    winddirection: f32,
+    pub timestamp: DateTime<Utc>,
+    pub boatspeed: f32,
+    pub windspeed: f32,
+    pub winddirection: f32,
 }
 
 impl DataPoint {
@@ -45,8 +45,9 @@ impl DataPoint {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct Data {
-    data: Vec<DataPoint>,
+    pub data: Vec<DataPoint>,
 }
 
 impl Data {
@@ -113,7 +114,13 @@ impl Data {
         }
     }
 
-    pub fn graph(&self, width: u32, height: u32) -> Image {
+    pub fn graph(
+        &self,
+        width: u32,
+        height: u32,
+        start_datetime: DateTime<Utc>,
+        end_datetime: DateTime<Utc>,
+    ) -> Image {
         let mut graphicimage = GraphicImage::new(width, height);
         if self.data.len() >= 2 {
             let (
@@ -126,6 +133,7 @@ impl Data {
             ) = self
                 .data
                 .iter()
+                .filter(|a| a.timestamp >= start_datetime && a.timestamp <= end_datetime)
                 .map(|a| {
                     (
                         a.timestamp,
@@ -151,13 +159,14 @@ impl Data {
             let minspeed = (smallest_boatspeed.min(smallest_windspeed)).floor();
             let speed_ratio = (height - 1) as f32 / maxspeed;
             let direction_ratio = height as f32 / 180f32;
-            let time_range = latest_time - earliest_time;
+            let time_range = latest_time.min(end_datetime) - earliest_time;
             let time_range_milliseconds = time_range.num_milliseconds() as f32;
             let bin_time_range =
                 TimeDelta::milliseconds((time_range_milliseconds / width as f32) as i64);
-            let mut bin_start_time = earliest_time;
+            let mut bin_start_time = earliest_time.max(start_datetime);
+            let stop_time = latest_time.min(end_datetime);
             let mut x = 0;
-            while bin_start_time <= latest_time {
+            while bin_start_time <= stop_time {
                 let bin_end_time = bin_start_time + bin_time_range;
                 // Boat speeds
                 let bin_data_set: Vec<&DataPoint> = self

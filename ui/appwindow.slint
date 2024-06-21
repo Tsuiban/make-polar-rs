@@ -1,9 +1,25 @@
-import { VerticalBox, HorizontalBox, LineEdit } from "std-widgets.slint";
+import { Slider, VerticalBox, LineEdit, HorizontalBox } from "std-widgets.slint";
 
 export component AppWindow inherits Window {
     in property<image> graph-image;
     in property<length> graph-image-width : 640px;
     in property<length> graph-image-height : 480px;
+
+    in property<string> data-minimum-time;
+    in property<string> data-maximum-time;
+
+    in-out property display_timestamp-min <=> start-time-text.text;
+    in-out property display_timestamp-max <=> end-time-text.text;
+
+    in-out property<float> display-start-scroller-value <=> start-scroller.value;
+    in-out property<float> display-end-scroller-value <=> end-scroller.value;
+
+    in property<float> display-scroller-max-value : 100;
+
+    callback start_time_edited;
+    callback end_time_edited;
+    callback redraw_graph();
+    callback scroller-changed;
 
     VerticalBox {
         Image {
@@ -11,11 +27,56 @@ export component AppWindow inherits Window {
             height: graph-image-height;
             source: graph-image;
         }
+        Rectangle { height: 10px; vertical-stretch: 0;}
         HorizontalBox {
-            Text { text: "Start timestamp: "; horizontal-stretch: 0;}
-            start-time-text := LineEdit {}
-            Text { text: "End timestamp: "; horizontal-stretch: 0; }
-            end-time-text := LineEdit {}
+            vertical-stretch: 0;
+            Text {
+                text: data-minimum-time;
+                vertical-stretch: 0;
+                horizontal-alignment: left;
+            }
+            start-time-text := LineEdit {
+                vertical-stretch: 0;
+                horizontal-alignment: center;
+                edited(s) => { root.start_time_edited(); }
+                accepted(s) => { root.redraw_graph(); }
+            }
+            end-time-text := LineEdit {
+                vertical-stretch: 0;
+                horizontal-alignment: center;
+                edited(s) => { root.end_time_edited(); }
+                accepted(s) => { root.redraw_graph(); }
+            }
+            Text {
+                text: data-maximum-time;
+                vertical-stretch: 0;
+                horizontal-alignment: right;
+            }
+        }
+        start-scroller := Slider {
+            vertical-stretch: 0;
+            maximum: display-scroller-max-value;
+            changed => {
+                if (self.value >= end-scroller.value) {
+                    if (end-scroller.value < 1.0) { self.value = 0; }
+                    else { self.value = end-scroller.value - 1.0 }
+                }
+                root.scroller-changed();
+            }
+            released => { root.redraw_graph(); }
+        }
+        end-scroller := Slider {
+            vertical-stretch: 0;
+            maximum: display-scroller-max-value;
+            changed => {
+                if (self.value <= start_scroller.value) {
+                    if (start-scroller.value < self.maximum - 1.0) {
+                        self.value = start-scroller.value + 1.0;
+                    } else { self.value = self.maximum; }
+                }
+                root.scroller-changed();
+            }
+            released => { root.redraw_graph(); }
         }
     }
 }
