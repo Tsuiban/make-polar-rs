@@ -126,9 +126,9 @@ impl Data {
             let (
                 earliest_time,
                 latest_time,
-                smallest_boatspeed,
+                _,
                 largest_boatspeed,
-                smallest_windspeed,
+                _,
                 largest_windspeed,
             ) = self
                 .data
@@ -155,17 +155,17 @@ impl Data {
                     )
                 })
                 .unwrap();
-            let maxspeed = (largest_boatspeed.max(largest_windspeed)).floor() + 1f32;
-            let minspeed = (smallest_boatspeed.min(smallest_windspeed)).floor();
-            let speed_ratio = (height - 1) as f32 / maxspeed;
+            let speed_ratio = (height - 1) as f32 / ((largest_boatspeed.max(largest_windspeed)).floor() + 1f32);
             let direction_ratio = height as f32 / 180f32;
-            let time_range = latest_time.min(end_datetime) - earliest_time;
-            let time_range_milliseconds = time_range.num_milliseconds() as f32;
+
+            let time_range_milliseconds = (latest_time.min(end_datetime) - earliest_time).num_milliseconds() as f32;
             let bin_time_range =
                 TimeDelta::milliseconds((time_range_milliseconds / width as f32) as i64);
             let mut bin_start_time = earliest_time.max(start_datetime);
             let stop_time = latest_time.min(end_datetime);
+
             let mut x = 0;
+
             while bin_start_time <= stop_time {
                 let bin_end_time = bin_start_time + bin_time_range;
                 // Boat speeds
@@ -227,7 +227,6 @@ impl Data {
                 x += 1;
                 bin_start_time += bin_time_range;
             }
-            println!("Min Speed: {minspeed}, Max Speed: {maxspeed}");
         }
         graphicimage.to_image()
     }

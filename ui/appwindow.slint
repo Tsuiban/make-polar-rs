@@ -23,60 +23,63 @@ export component AppWindow inherits Window {
 
     VerticalBox {
         Image {
-            width: graph-image-width;
-            height: graph-image-height;
+            min-width: graph-image-width;
+            min-height: graph-image-height;
             source: graph-image;
         }
-        Rectangle { height: 10px; vertical-stretch: 0;}
-        HorizontalBox {
+        VerticalBox {
             vertical-stretch: 0;
-            Text {
-                text: data-minimum-time;
+            Rectangle { height: 10px; vertical-stretch: 0;}
+            HorizontalBox {
                 vertical-stretch: 0;
-                horizontal-alignment: left;
-            }
-            start-time-text := LineEdit {
-                vertical-stretch: 0;
-                horizontal-alignment: center;
-                edited(s) => { root.start_time_edited(); }
-                accepted(s) => { root.redraw_graph(); }
-            }
-            end-time-text := LineEdit {
-                vertical-stretch: 0;
-                horizontal-alignment: center;
-                edited(s) => { root.end_time_edited(); }
-                accepted(s) => { root.redraw_graph(); }
-            }
-            Text {
-                text: data-maximum-time;
-                vertical-stretch: 0;
-                horizontal-alignment: right;
-            }
-        }
-        start-scroller := Slider {
-            vertical-stretch: 0;
-            maximum: display-scroller-max-value;
-            changed => {
-                if (self.value >= end-scroller.value) {
-                    if (end-scroller.value < 1.0) { self.value = 0; }
-                    else { self.value = end-scroller.value - 1.0 }
+                Text {
+                    text: data-minimum-time;
+                    vertical-stretch: 0;
+                    horizontal-alignment: left;
                 }
-                root.scroller-changed();
-            }
-            released => { root.redraw_graph(); }
-        }
-        end-scroller := Slider {
-            vertical-stretch: 0;
-            maximum: display-scroller-max-value;
-            changed => {
-                if (self.value <= start_scroller.value) {
-                    if (start-scroller.value < self.maximum - 1.0) {
-                        self.value = start-scroller.value + 1.0;
-                    } else { self.value = self.maximum; }
+                start-time-text := LineEdit {
+                    vertical-stretch: 0;
+                    horizontal-alignment: center;
+                    edited(s) => { root.start_time_edited(); }
+                    accepted(s) => { root.redraw_graph(); }
                 }
-                root.scroller-changed();
+                end-time-text := LineEdit {
+                    vertical-stretch: 0;
+                    horizontal-alignment: center;
+                    edited(s) => { root.end_time_edited(); }
+                    accepted(s) => { root.redraw_graph(); }
+                }
+                Text {
+                    text: data-maximum-time;
+                    vertical-stretch: 0;
+                    horizontal-alignment: right;
+                }
             }
-            released => { root.redraw_graph(); }
+            start-scroller := Slider {
+                vertical-stretch: 0;
+                maximum: display-scroller-max-value;
+                changed => {
+                    if (self.value >= end-scroller.value) {
+                        if (end-scroller.value < 1.0) { self.value = 0; }
+                        else { self.value = end-scroller.value - 1.0 }
+                    }
+                    root.scroller-changed();
+                }
+                released => { root.redraw_graph(); }
+            }
+            end-scroller := Slider {
+                vertical-stretch: 0;
+                maximum: display-scroller-max-value;
+                changed => {
+                    if (self.value <= start_scroller.value) {
+                        if (start-scroller.value < self.maximum - 1.0) {
+                            self.value = start-scroller.value + 1.0;
+                        } else { self.value = self.maximum; }
+                    }
+                    root.scroller-changed();
+                }
+                released => { root.redraw_graph(); }
+            }
         }
     }
 }
